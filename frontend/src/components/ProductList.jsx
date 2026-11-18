@@ -31,23 +31,14 @@ export function ProductList({ products = [], title = 'Juegos Destacados' }) {
     setActiveIndex((prev) => (prev + 1) % products.length)
   }
 
-  // Obtenemos los 5 indices circulares para mostrar en carrusel
+  // Obtenemos los 5 indices circulares con su nivel de profundidad
   const getVisibleProducts = () => {
-    if (products.length <= 5) {
-      return products.map((p, idx) => ({
-        product: p,
-        isCenter: idx === activeIndex,
-        badge: idx === activeIndex ? 'MAS VENDIDO' : BADGES[idx % BADGES.length],
-        index: idx
-      }))
-    }
-
     const offsets = [-2, -1, 0, 1, 2]
     return offsets.map((offset) => {
       const idx = (activeIndex + offset + products.length) % products.length
       return {
         product: products[idx],
-        isCenter: offset === 0,
+        level: offset,
         badge: offset === 0 ? 'MAS VENDIDO' : BADGES[(idx + 1) % BADGES.length],
         index: idx
       }
@@ -71,14 +62,14 @@ export function ProductList({ products = [], title = 'Juegos Destacados' }) {
         </p>
       </div>
 
-      {/* Carousel Container with Side Navigation Arrows */}
-      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-8">
+      {/* Carousel Container with Perspective Gradient Effect */}
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-10 py-6">
         {/* Left Arrow Button */}
         <button
           type="button"
           aria-label="Anterior"
           onClick={handlePrev}
-          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -88,23 +79,23 @@ export function ProductList({ products = [], title = 'Juegos Destacados' }) {
           type="button"
           aria-label="Siguiente"
           onClick={handleNext}
-          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
 
-        {/* Responsive Grid / Cards row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 items-center">
-          {visibleCards.map(({ product, isCenter, badge, index }, slotIdx) => (
+        {/* Cards Row with Graduated Perspective */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2.5 lg:gap-3 items-end justify-center min-h-[480px]">
+          {visibleCards.map(({ product, level, badge, index }, slotIdx) => (
             <div
               key={`${product.id}-${slotIdx}`}
-              className={`${
+              className={`h-full transition-all duration-500 ${
                 slotIdx === 0 || slotIdx === 4
-                  ? 'hidden lg:block'
+                  ? 'hidden lg:flex'
                   : slotIdx === 1 || slotIdx === 3
-                  ? 'hidden sm:block'
-                  : 'block'
-              }`}
+                  ? 'hidden sm:flex'
+                  : 'flex'
+              } flex-col justify-end`}
             >
               <ProductCard
                 nombre={product.nombre}
@@ -118,7 +109,7 @@ export function ProductList({ products = [], title = 'Juegos Destacados' }) {
                 categoria={product.categoria}
                 categoria_nombre={product.categoria_nombre}
                 badge={badge}
-                isCenter={isCenter}
+                level={level}
                 onClick={() => setActiveIndex(index)}
               />
             </div>
