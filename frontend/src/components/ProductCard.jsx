@@ -12,92 +12,106 @@ export function ProductCard({
   imagen,
   categoria,
   categoria_nombre,
-  cantidad_disponible = 0
+  badge = 'DESTACADO',
+  isCenter = false,
+  onClick
 }) {
-  const displayCategory = categoria_nombre || categoria || 'Juegos'
-  const currentPrice = typeof precio === 'number' 
-    ? precio.toFixed(2) 
+  const currentPrice = typeof precio === 'number'
+    ? precio.toFixed(2)
     : parseFloat(precio || 0).toFixed(2)
 
-  const originalPrice = precio_anterior 
-    ? (typeof precio_anterior === 'number' ? precio_anterior.toFixed(2) : parseFloat(precio_anterior).toFixed(2))
-    : (parseFloat(currentPrice) * 1.25).toFixed(2)
-
-  const discountBadge = descuento || '-20%'
-  const isAvailable = cantidad_disponible > 0
+  const displayCategory = categoria_nombre || categoria || 'Juegos'
 
   return (
-    <div className="group bg-white rounded-2xl border border-slate-100/90 p-3 flex flex-col justify-between hover:shadow-xl hover:border-slate-200 transition-all duration-300 relative">
-      {/* Top Badges */}
-      <div className="flex items-center justify-between z-10 mb-1">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100">
-          {discountBadge}
+    <div
+      onClick={onClick}
+      className={`transition-all duration-500 rounded-3xl border flex flex-col justify-between cursor-pointer select-none ${
+        isCenter
+          ? 'bg-[#fcfaf7] border-stone-300/90 shadow-2xl scale-100 sm:scale-105 z-20 p-5 sm:p-7 ring-1 ring-stone-200'
+          : 'bg-[#faf7f2]/90 hover:bg-[#fcfaf7] border-stone-200/70 shadow-sm hover:shadow-md scale-95 opacity-85 hover:opacity-100 z-10 p-4 sm:p-5'
+      }`}
+    >
+      {/* Top Bar: Badge & Wishlist */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-md bg-[#eee7dd] text-[#826e55]">
+          {badge}
         </span>
         <button
           type="button"
-          aria-label="Guardar en favoritos"
-          className="w-7 h-7 rounded-full bg-white/80 hover:bg-white text-slate-400 hover:text-rose-500 flex items-center justify-center transition-colors shadow-2xs"
+          aria-label="Favoritos"
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
+          className="w-7 h-7 rounded-full text-stone-400 hover:text-rose-500 flex items-center justify-center transition-colors"
         >
-          <Heart className="w-3.5 h-3.5" />
+          <Heart className="w-4 h-4" />
         </button>
       </div>
 
       {/* Product Image */}
-      <div className="relative aspect-square w-full rounded-xl bg-slate-50/80 overflow-hidden flex items-center justify-center mb-3">
+      <div className="relative aspect-square w-full rounded-2xl bg-white/60 overflow-hidden flex items-center justify-center p-3 mb-3 shadow-inner">
         <img
-          src={imagen || 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=800&q=80'}
+          src={imagen || '/images/carcassonne.jpg'}
           alt={nombre}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover rounded-xl transition-transform duration-500 hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute bottom-2 left-2">
-          <span className="text-[9px] font-medium tracking-wide bg-white/90 backdrop-blur-xs text-slate-700 px-2 py-0.5 rounded-md border border-slate-200/50">
-            {displayCategory}
-          </span>
-        </div>
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col flex-1">
-        <h3 className="font-bold text-slate-900 text-xs sm:text-sm line-clamp-1 group-hover:text-[#0b2b20] transition-colors">
+      {/* Image Pagination Dots indicator inside card */}
+      <div className="flex items-center justify-center gap-1.5 mb-3">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#b89f80]"></span>
+        <span className="w-1.5 h-1.5 rounded-full bg-stone-300"></span>
+        <span className="w-1.5 h-1.5 rounded-full bg-stone-300"></span>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col flex-1 text-left">
+        <h3 className={`font-serif font-bold text-slate-900 line-clamp-1 ${isCenter ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'}`}>
           {nombre}
         </h3>
 
+        <p className="text-xs text-stone-500 line-clamp-2 mt-1 leading-relaxed">
+          {descripcion}
+        </p>
+
         {/* Rating */}
-        <div className="flex items-center gap-1 mt-1.5 mb-2">
-          <div className="flex items-center text-amber-400">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3 h-3 fill-amber-400" />
-            ))}
-          </div>
-          <span className="text-[10px] text-slate-400 font-medium ml-0.5">
-            ({reviews})
-          </span>
+        <div className="flex items-center gap-1 text-xs text-stone-600 font-semibold mt-2.5 mb-3">
+          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+          <span>{rating}</span>
+          <span className="text-stone-400 font-normal">({reviews})</span>
         </div>
 
-        {/* Bottom Price & Cart Button */}
-        <div className="mt-auto pt-2 border-t border-slate-50 flex items-center justify-between">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-sm sm:text-base font-extrabold text-[#0b2b20]">
+        {/* Price & Action Button */}
+        <div className="mt-auto pt-3 border-t border-stone-200/50 flex items-center justify-between gap-3">
+          <div className="flex items-baseline">
+            <span className={`font-serif font-bold text-slate-900 ${isCenter ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'}`}>
               S/ {currentPrice}
-            </span>
-            <span className="text-[11px] text-slate-400 line-through">
-              S/ {originalPrice}
             </span>
           </div>
 
-          <button
-            type="button"
-            disabled={!isAvailable}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-              isAvailable
-                ? 'bg-[#0b2b20] hover:bg-[#144434] active:scale-95 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-            }`}
-            title={isAvailable ? 'Agregar al carrito' : 'Agotado'}
-          >
-            <ShoppingCart className="w-3.5 h-3.5" />
-          </button>
+          {isCenter ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+              className="px-4 py-2 rounded-xl bg-[#b89f80] hover:bg-[#a38a6c] active:scale-95 text-white text-xs font-semibold tracking-wide flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+              <span>Agregar</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+              className="w-8 h-8 rounded-xl bg-[#eee7dd] hover:bg-[#b89f80] text-[#826e55] hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

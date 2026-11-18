@@ -1,60 +1,144 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ProductCard } from './ProductCard'
-import { Sparkles, ArrowRight, PackageOpen } from 'lucide-react'
+import { ChevronLeft, ChevronRight, PackageOpen } from 'lucide-react'
 
-export function ProductList({ products = [], title = 'Juegos Destacados para Ti' }) {
+const BADGES = ['NUEVO', 'TENDENCIA', 'MAS VENDIDO', 'POPULAR', 'DESTACADO']
+
+export function ProductList({ products = [], title = 'Juegos Destacados' }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+
   if (products.length === 0) {
     return (
-      <div className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-slate-200 max-w-md mx-auto my-6">
+      <div className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-stone-200 max-w-md mx-auto my-6">
         <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-50 flex items-center justify-center text-[#0b2b20]">
           <PackageOpen className="w-7 h-7" />
         </div>
         <h4 className="text-base font-bold text-slate-800">
           No hay juegos disponibles
         </h4>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-stone-500 mt-1">
           Intenta seleccionando otra categoria o restableciendo los filtros.
         </p>
       </div>
     )
   }
 
-  return (
-    <div className="space-y-4">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-            {title}
-          </h2>
-          <Sparkles className="w-4 h-4 text-amber-500" />
-        </div>
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + products.length) % products.length)
+  }
 
-        <a
-          href="#todos"
-          className="text-xs font-bold text-[#0b2b20] hover:text-emerald-800 flex items-center gap-1 transition-colors"
-        >
-          Ver Todas las Ofertas
-          <ArrowRight className="w-3.5 h-3.5" />
-        </a>
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % products.length)
+  }
+
+  // Obtenemos los 5 indices circulares para mostrar en carrusel
+  const getVisibleProducts = () => {
+    if (products.length <= 5) {
+      return products.map((p, idx) => ({
+        product: p,
+        isCenter: idx === activeIndex,
+        badge: idx === activeIndex ? 'MAS VENDIDO' : BADGES[idx % BADGES.length],
+        index: idx
+      }))
+    }
+
+    const offsets = [-2, -1, 0, 1, 2]
+    return offsets.map((offset) => {
+      const idx = (activeIndex + offset + products.length) % products.length
+      return {
+        product: products[idx],
+        isCenter: offset === 0,
+        badge: offset === 0 ? 'MAS VENDIDO' : BADGES[(idx + 1) % BADGES.length],
+        index: idx
+      }
+    })
+  }
+
+  const visibleCards = getVisibleProducts()
+
+  return (
+    <div className="w-full py-8 text-center space-y-8 select-none">
+      {/* Editorial Header */}
+      <div className="space-y-2 max-w-xl mx-auto px-4">
+        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#998369] block">
+          NUESTRA COLECCION
+        </span>
+        <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 tracking-tight">
+          {title}
+        </h2>
+        <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">
+          Explora los juegos de mesa mas populares y valorados por nuestra comunidad
+        </p>
       </div>
 
-      {/* Grid: 4 columns matching the exact previous size */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4.5">
-        {products.map((producto) => (
-          <ProductCard
-            key={producto.id}
-            nombre={producto.nombre}
-            descripcion={producto.descripcion}
-            precio={producto.precio}
-            precio_anterior={producto.precio_anterior}
-            descuento={producto.descuento}
-            rating={producto.rating}
-            reviews={producto.reviews}
-            imagen={producto.imagen}
-            categoria={producto.categoria}
-            categoria_nombre={producto.categoria_nombre}
-            cantidad_disponible={producto.cantidad_disponible}
+      {/* Carousel Container with Side Navigation Arrows */}
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-8">
+        {/* Left Arrow Button */}
+        <button
+          type="button"
+          aria-label="Anterior"
+          onClick={handlePrev}
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+
+        {/* Right Arrow Button */}
+        <button
+          type="button"
+          aria-label="Siguiente"
+          onClick={handleNext}
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-slate-900 shadow-xl border border-stone-200/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Responsive Grid / Cards row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 items-center">
+          {visibleCards.map(({ product, isCenter, badge, index }, slotIdx) => (
+            <div
+              key={`${product.id}-${slotIdx}`}
+              className={`${
+                slotIdx === 0 || slotIdx === 4
+                  ? 'hidden lg:block'
+                  : slotIdx === 1 || slotIdx === 3
+                  ? 'hidden sm:block'
+                  : 'block'
+              }`}
+            >
+              <ProductCard
+                nombre={product.nombre}
+                descripcion={product.descripcion}
+                precio={product.precio}
+                precio_anterior={product.precio_anterior}
+                descuento={product.descuento}
+                rating={product.rating}
+                reviews={product.reviews}
+                imagen={product.imagen}
+                categoria={product.categoria}
+                categoria_nombre={product.categoria_nombre}
+                badge={badge}
+                isCenter={isCenter}
+                onClick={() => setActiveIndex(index)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Pagination Dots */}
+      <div className="flex items-center justify-center gap-2 pt-2">
+        {products.map((p, idx) => (
+          <button
+            key={p.id}
+            type="button"
+            aria-label={`Ver ${p.nombre}`}
+            onClick={() => setActiveIndex(idx)}
+            className={`transition-all duration-300 rounded-full cursor-pointer ${
+              idx === activeIndex
+                ? 'w-7 h-2.5 bg-[#b89f80]'
+                : 'w-2.5 h-2.5 bg-stone-300 hover:bg-stone-400'
+            }`}
           />
         ))}
       </div>
